@@ -27,7 +27,12 @@ async function getTriviaPage(pageNum){
                 options.push(matching[1]);
             }
         });
-        const answer = /^Answer: [A-D]\.\s(.*)/g.exec($(answerContainer.find('h2')[0]).text())[1].trim();
+        let answer = '';
+        if(options.length){
+            answer = /^Answer: [A-D]\.\s(.*)/g.exec($(answerContainer.find('h2')[0]).text())[1].trim();
+        } else{
+            answer = /^Answer:\s(.*)/g.exec($(answerContainer.find('h2')[0]).text())[1].trim();
+        }
         const answerDescription = $(answerContainer.find('p').not('.listicle-image-wrapper')).text().trim();
         questions.push({
             question,
@@ -37,8 +42,17 @@ async function getTriviaPage(pageNum){
             answerDescription 
         })
     }
-    console.log(questions);
-
+    return questions;
 }
 
-getTriviaPage(2);
+async function getAllTriviaQuestions(){
+    let questions = [];
+    for(let i = 1; i < 11; i++){
+        console.log('Requesting page', i);
+        questions = questions.concat(await getTriviaPage(i));
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    console.log(questions);
+}
+
+getAllTriviaQuestions();
